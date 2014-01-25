@@ -28,19 +28,18 @@ class CSVFile {
 	/**
 	 * Open a file for reading ('r', default) or writing ('w')
 	 *
-	 * Set mode to false to not read the header row
-	 *
 	 * @param string      $file
 	 * @param string|null $mode
+	 * @param bool|null   $header
 	 */
-	public function __construct($file, $mode = 'r') {
+	public function __construct($file, $mode = 'r', $header = true) {
 		$this->resource = fopen($file, $mode);
 
 		if (!$this->resource) {
 			throw new \Exception('Unable to open file ' . $file);
 		}
 
-		if ($mode == 'r') {
+		if ($mode == 'r' && $header) {
 			$this->header();
 
 			// TODO: read description from JSON file?
