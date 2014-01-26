@@ -63,12 +63,12 @@ class CSVFile {
 				continue;
 			}
 
-			// call header() first to read the header row
+			// map each column to an associative array, if a header row was present
 			if ($this->columns) {
 				// make sure enough columns are present
 				$row = array_pad($row, $this->columns, null);
 
-				// map each column to an associative array
+				// combine column headers and row values
 				$row = array_combine($this->header, $row);
 			}
 
