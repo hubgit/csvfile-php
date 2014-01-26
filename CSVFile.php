@@ -52,8 +52,14 @@ class CSVFile {
 	 * @param callable $callback
 	 */
 	public function read($callback) {
-		while (($row = $this->row()) !== false) {
-			if ($this->skipBlankRows && is_null($row[0]) && count($row) === 1) {
+		do {
+			$row = $this->row();
+
+			if ($row === false) {
+				break;
+			}
+
+			if ($this->skipBlankRows && count($row) === 1 && is_null($row[0])) {
 				continue;
 			}
 
@@ -67,7 +73,7 @@ class CSVFile {
 			}
 
 			call_user_func($callback, $row);
-		}
+		} while (true);
 	}
 
 	/**
