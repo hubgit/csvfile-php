@@ -1,8 +1,8 @@
 <?php
 
-require __DIR__ . '/./CSVFile.php';
+require __DIR__ . '/../CSVFile.php';
 
-$csvfile = new CSVFile('example.csv');
+$csvfile = new CSVFile(__DIR__ . '/example.csv');
 
 $total = 0;
 
