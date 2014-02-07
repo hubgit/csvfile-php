@@ -1,23 +1,25 @@
 <?php
 
 class CSVFile {
-	/** @var string */
-	public $delimiter = ',';
+	/** @var array */
+	public $dialect = array(
+		'length' => 0,
+		'delimiter' => ',',
+		'enclosure' => '"',
+		'escape' => '\\',
+	);
 
-	/** @var integer */
-	public $length = 0;
-
-	/** @var string */
-	public $enclosure = '"';
-
-	/** @var string */
-	public $escape = '\\';
-
-	/** @var boolean */
-	public $skipBlankRows = false;
+	public $options = array(
+		'skipBlankRows' => false,
+		'skipInitialSpace' => false,
+		'skipFinalSpace' => false,
+	);
 
 	/** @var array */
 	private $header = array();
+
+	/** @var array */
+	private $fields = array();
 
 	/** @var integer */
 	private $columns = 0;
@@ -28,22 +30,32 @@ class CSVFile {
 	/**
 	 * Open a file for reading ('r', default) or writing ('w')
 	 *
-	 * @param string      $file
-	 * @param string|null $mode
-	 * @param bool|null   $header
+	 * @param string  $file
+	 * @param array   $description
 	 */
-	public function __construct($file, $mode = 'r', $header = true) {
-		$this->resource = fopen($file, $mode);
+	public function __construct($file, $description = array()) {
+		$this->resource = fopen($file, 'r');
 
 		if (!$this->resource) {
 			throw new \Exception('Unable to open file ' . $file);
 		}
 
-		if ($mode == 'r' && $header) {
-			$this->header();
+		print_r($description);
 
-			// TODO: read description from JSON file?
+		$this->dialect = array_merge($this->dialect, (array) $description->dialect);
+		$this->options = array_merge($this->options, (array) $description->options);
+		$this->fields = (array) $description->fields;
+
+		if (isset($description->header)) {
+			// read header row from the description
+			$this->header = $description->header;
+		} else {
+			// read header row from the csv file
+			// TODO: handle more than one header row ($description->headers->rows)
+			$this->header = $this->row();
 		}
+
+		$this->columns = count($this->header);
 	}
 
 	/**
@@ -55,11 +67,13 @@ class CSVFile {
 		do {
 			$row = $this->row();
 
+			// end of the file
 			if ($row === false) {
 				break;
 			}
 
-			if ($this->skipBlankRows && count($row) === 1 && is_null($row[0])) {
+			// blank row
+			if ($this->options['skipBlankRows'] && count($row) === 1 && is_null($row[0])) {
 				continue;
 			}
 
@@ -70,6 +84,9 @@ class CSVFile {
 
 				// combine column headers and row values
 				$row = array_combine($this->header, $row);
+
+				// convert values to appropriate data types
+				array_walk($row, array($this, 'convert'));
 			}
 
 			call_user_func($callback, $row);
@@ -80,22 +97,11 @@ class CSVFile {
 	 * Read a single row of the file
 	 */
 	public function row() {
-		return fgetcsv($this->resource, $this->length, $this->delimiter, $this->enclosure, $this->escape);
-	}
-
-	/**
-	 * Read the header row
-	 */
-	public function header() {
-		$this->header = $this->row();
-		$this->columns = count($this->header);
-	}
-
-	/**
-	 * Write a row to the file
-	 */
-	public function write($data) {
-		fputcsv($this->resource, $data);
+		return fgetcsv($this->resource,
+			$this->dialect['length'],
+			$this->dialect['delimiter'],
+			$this->dialect['enclosure'],
+			$this->dialect['escape']);
 	}
 
 	/**
@@ -103,5 +109,36 @@ class CSVFile {
 	 */
 	public function close() {
 		fclose($this->resource);
+	}
+
+	/**
+	 * Convert values to appropriate data types
+	 */
+	protected function convert(&$value, $field) {
+		switch ($this->fields[$field]) {
+			case 'integer':
+				$value = (integer) $value;
+				break;
+
+			case 'float':
+				$value = (float) $value;
+				break;
+
+			case 'bool':
+			case 'boolean':
+				$value = (boolean) $value;
+				break;
+
+			case 'datetime':
+				// TODO: parse with specified format?
+				// TODO: catch non-standard dates?
+				$value = new DateTime($value);
+				break;
+
+			case 'string':
+			case 'date':
+			default:
+				break;
+		}
 	}
 }

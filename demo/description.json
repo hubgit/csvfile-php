@@ -1,0 +1,31 @@
+{
+  "fields": {
+    "id": "string",
+    "title": "string",
+    "volume": "integer",
+    "date published": "datetime"
+  },
+  "dialect": {
+    "delimiter": ",",
+    "terminator": "\n",
+    "enclosure": "\""
+  },
+  "options": {
+    "doubleQuote": false,
+    "skipInitialSpace": false
+  },
+  "headers": {
+    "rows": 1,
+    "columns": 1,
+    "skip-rows": 4,
+    "skip-columns": 0
+  },
+  "display": {
+    "datePublished": {
+      "format": "YYYY-mm-dd",
+      "title": "publication date",
+      "description": "the date the item was published"
+    }
+  },
+  "@context": "http://example.com/context.json"
+}
