@@ -11,6 +11,7 @@ if ($description->context) {
 	$description->fields = $context->{'@context'};
 }
 
+// read each row of the file and process it in a callback
 $items = array();
 
 $csvfile = new CSVFile($description->url, $description);
@@ -18,4 +19,5 @@ $csvfile->read(function($item) use (&$items) {
 	$items[] = $item;
 });
 
+// output the collected data
 print json_encode($items, JSON_PRETTY_PRINT);
