@@ -8,7 +8,7 @@ class CSVFile {
 		'enclosure' => '"',
 		'escape' => '\\',
 		//'double-quote' => true,
-		'skip-blank-rows' => false,
+		'skip-blank-rows' => false, // use blank rows as a table separator instead?
 		//'skip-initial-space' => false,
 		//'skip-final-space' => false,
 	);

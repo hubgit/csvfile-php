@@ -11,7 +11,9 @@
   "headers": {
     "rows": 1,
     "columns": 1,
-    "skip-rows": 4,
-    "skip-columns": 0
+  },
+  "skip": {
+    "rows": 4,
+    "columns": 0
   }
 }
