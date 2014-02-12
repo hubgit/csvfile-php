@@ -1,5 +1,6 @@
 {
   "url": "header.csv",
+  "context": "context.json",
   "fields": {
     "id": {
       "type": "string"
@@ -34,6 +35,5 @@
     "columns": 1,
     "skip-rows": 4,
     "skip-columns": 0
-  },
-  "@context": "http://example.com/context.json"
+  }
 }
