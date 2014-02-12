@@ -1,31 +1,38 @@
 {
   "fields": {
-    "id": "string",
-    "title": "string",
-    "volume": "integer",
-    "date published": "datetime"
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "volume": {
+      "type": "integer"
+    },
+    "weight (kg)": {
+      "type": "integer",
+      "property": "weight",
+      "unit": "kg"
+    },
+    "date published": {
+      "type": "datetime",
+      "format": "YYYY-mm-dd",
+      "title": "publication date",
+      "description": "the date the item was published"
+    }
   },
   "dialect": {
     "delimiter": ",",
     "terminator": "\n",
-    "enclosure": "\""
-  },
-  "options": {
-    "doubleQuote": false,
-    "skipInitialSpace": false
+    "enclosure": "\"",
+    "double-quote": false,
+    "skip-initial-space": false
   },
   "headers": {
     "rows": 1,
     "columns": 1,
     "skip-rows": 4,
     "skip-columns": 0
-  },
-  "display": {
-    "datePublished": {
-      "format": "YYYY-mm-dd",
-      "title": "publication date",
-      "description": "the date the item was published"
-    }
   },
   "@context": "http://example.com/context.json"
 }

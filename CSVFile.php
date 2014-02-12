@@ -7,12 +7,10 @@ class CSVFile {
 		'delimiter' => ',',
 		'enclosure' => '"',
 		'escape' => '\\',
-	);
-
-	public $options = array(
-		'skipBlankRows' => false,
-		'skipInitialSpace' => false,
-		'skipFinalSpace' => false,
+		//'double-quote' => true,
+		'skip-blank-rows' => false,
+		//'skip-initial-space' => false,
+		//'skip-final-space' => false,
 	);
 
 	/** @var array */
@@ -43,8 +41,7 @@ class CSVFile {
 		print_r($description);
 
 		$this->dialect = array_merge($this->dialect, (array) $description->dialect);
-		$this->options = array_merge($this->options, (array) $description->options);
-		$this->fields = (array) $description->fields;
+		$this->fields = $description->fields;
 
 		if (isset($description->header)) {
 			// read header row from the description
@@ -73,7 +70,7 @@ class CSVFile {
 			}
 
 			// blank row
-			if ($this->options['skipBlankRows'] && count($row) === 1 && is_null($row[0])) {
+			if ($this->dialect['skip-blank-rows'] && count($row) === 1 && is_null($row[0])) {
 				continue;
 			}
 
@@ -115,7 +112,7 @@ class CSVFile {
 	 * Convert values to appropriate data types
 	 */
 	protected function convert(&$value, $field) {
-		switch ($this->fields[$field]) {
+		switch ($this->fields->{$field}->type) {
 			case 'integer':
 				$value = (integer) $value;
 				break;
