@@ -1,4 +1,5 @@
 {
+  "url": "header.csv",
   "fields": {
     "id": {
       "type": "string"
