@@ -2,19 +2,10 @@
 
 require __DIR__ . '/../CSVFile.php';
 
-// read in the description file
-$description = json_decode(file_get_contents('description.json'));
-
-// read in the context file
-if ($description->context) {
-	$context = json_decode(file_get_contents($description->context));
-	$description->fields = $context->{'@context'};
-}
-
 // read each row of the file and process it in a callback
 $items = array();
 
-$csvfile = new CSVFile('demo.csv', $description);
+$csvfile = new CSVFile('demo.csv', 'description.json');
 $csvfile->read(function($item) use (&$items) {
 	$items[] = $item;
 });

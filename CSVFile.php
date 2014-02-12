@@ -14,7 +14,7 @@ class CSVFile {
 	private $header = array();
 
 	/** @var array */
-	private $fields = null;
+	private $fields = array();
 
 	/** @var integer */
 	private $columns = 0;
@@ -25,28 +25,46 @@ class CSVFile {
 	/**
 	 * Open a file for reading
 	 *
-	 * @param string  $file
-	 * @param array   $description
+	 * @param string  		$file
+	 * @param string|null   $descriptionFile
 	 */
-	public function __construct($file, $description = array()) {
+	public function __construct($file, $descriptionFile = null) {
 		$this->resource = fopen($file, 'r');
 
 		if (!$this->resource) {
 			throw new \Exception('Unable to open file ' . $file);
 		}
 
-		print_r($description);
+		// read in the description file
+		$description = json_decode(file_get_contents($descriptionFile), true);
 
-		$this->dialect = array_merge($this->dialect, (array) $description->dialect);
-
-		$this->fields = new stdClass;
-		foreach ($description->fields as $field => $definition) {
-			$this->fields->{$field} = is_string($definition) ? array('@type' => $definition) : $definition;
+		// read in the context file
+		if ($description['context']) {
+			$context = json_decode(file_get_contents($description['context']), true);
+			$description['fields'] = $context['@context'];
 		}
 
-		if (isset($description->header)) {
+		print_r($description);
+
+		$this->dialect = array_merge($this->dialect, $description['dialect']);
+
+		$this->fields = array();
+		foreach ($description['fields'] as $field => $definition) {
+			$this->fields[$field] = is_string($definition) ? array('@type' => $definition) : $definition;
+		}
+
+		// skip rows
+		if ($description['skip']['rows']) {
+			foreach (range(1, $description['skip']['rows']) as $skip) {
+				$this->row();
+			}
+		}
+
+		// TODO: skip columns ($description->skip->columns)
+
+		if (isset($description['header'])) {
 			// read header row from the description
-			$this->header = $description->header;
+			$this->header = $description['header'];
 		} else {
 			// read header row from the csv file
 			// TODO: handle more than one header row ($description->headers->rows)
@@ -124,10 +142,10 @@ class CSVFile {
 		$item = array();
 
 		foreach ($row as $field => $value) {
-			$definition = $this->fields->{$field};
+			$definition = $this->fields[$field];
 
-			if (isset($definition->{'@id'})) {
-				$field = $definition->{'@id'};
+			if (isset($definition['@id'])) {
+				$field = $definition['@id'];
 			}
 
 			$item[$field] = $value;
@@ -141,13 +159,13 @@ class CSVFile {
 	 *
 	 * http://www.w3.org/TR/rif-dtb/
 	 */
-	protected function convert(&$value, &$field) {
+	protected function convert(&$value, $field) {
 		// remove initial space(s) if required
 		if ($this->dialect['initial']) {
 			$value = substr($value, $this->dialect['initial']);
 		}
 
-		switch ($this->fields->{$field}->{'@type'}) {
+		switch ($this->fields[$field]['@type']) {
 			case 'integer':
 			case 'http://www.w3.org/2001/XMLSchema#integer':
 				$value = (integer) $value;
@@ -170,6 +188,7 @@ class CSVFile {
 				// TODO: parse with specified format?
 				// TODO: catch non-standard dates?
 				$value = new DateTime($value);
+				$value = $value->format(DATE_ATOM);
 				break;
 
 			case 'string':
