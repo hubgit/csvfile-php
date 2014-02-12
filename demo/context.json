@@ -12,6 +12,7 @@
       "@type": "integer"
     },
     "weight (kg)": {
+      "@id": "http://schema.org/weight",
       "@type": "integer"
     },
     "date published": {
