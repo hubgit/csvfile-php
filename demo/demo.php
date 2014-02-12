@@ -7,7 +7,7 @@ $items = array();
 
 $csvfile = new CSVFile('demo.csv', 'description.json');
 $csvfile->read(function($item) use (&$items) {
-	$items[] = $item;
+	$items[$item['id']] = $item;
 });
 
 // output the collected data
