@@ -23,7 +23,7 @@ class CSVFile {
 	private $resource;
 
 	/**
-	 * Open a file for reading ('r', default) or writing ('w')
+	 * Open a file for reading
 	 *
 	 * @param string  $file
 	 * @param array   $description
