@@ -110,23 +110,30 @@ class CSVFile {
 
 	/**
 	 * Convert values to appropriate data types
+	 *
+	 * http://www.w3.org/TR/rif-dtb/
 	 */
 	protected function convert(&$value, $field) {
-		switch ($this->fields->{$field}->type) {
+		switch ($this->fields->{$field}->{'@type'}) {
 			case 'integer':
+			case 'http://www.w3.org/2001/XMLSchema#integer':
 				$value = (integer) $value;
 				break;
 
 			case 'float':
+			case 'http://www.w3.org/2001/XMLSchema#float':
 				$value = (float) $value;
 				break;
 
 			case 'bool':
 			case 'boolean':
+			case 'http://www.w3.org/2001/XMLSchema#boolean':
 				$value = (boolean) $value;
 				break;
 
 			case 'datetime':
+			case 'dateTime':
+			case 'http://www.w3.org/2001/XMLSchema#dateTime':
 				// TODO: parse with specified format?
 				// TODO: catch non-standard dates?
 				$value = new DateTime($value);
@@ -134,6 +141,7 @@ class CSVFile {
 
 			case 'string':
 			case 'date':
+			case '@id':
 			default:
 				break;
 		}

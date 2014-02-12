@@ -1,28 +1,6 @@
 {
   "url": "header.csv",
   "context": "context.json",
-  "fields": {
-    "id": {
-      "type": "string"
-    },
-    "title": {
-      "type": "string"
-    },
-    "volume": {
-      "type": "integer"
-    },
-    "weight (kg)": {
-      "type": "integer",
-      "property": "weight",
-      "unit": "kg"
-    },
-    "date published": {
-      "type": "datetime",
-      "format": "YYYY-mm-dd",
-      "title": "publication date",
-      "description": "the date the item was published"
-    }
-  },
   "dialect": {
     "delimiter": ",",
     "terminator": "\n",

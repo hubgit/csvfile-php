@@ -11,10 +11,10 @@
       "@id": "http://purl.org/ontology/bibo/volume",
       "@type": "integer"
     },
-    "weight": {
-
+    "weight (kg)": {
+      "@type": "integer"
     },
-    "datePublished": {
+    "date published": {
       "@id": "http://schema.org/datePublished",
       "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
     }
