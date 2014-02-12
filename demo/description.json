@@ -3,9 +3,7 @@
   "dialect": {
     "delimiter": ",",
     "terminator": "\n",
-    "enclosure": "\"",
-    "double-quote": false,
-    "skip-initial-space": false
+    "enclosure": "\""
   },
   "headers": {
     "rows": 1,
