@@ -75,6 +75,11 @@ class CSVFile {
 				continue;
 			}
 
+			// comment row
+			//if (substr($row[0], 0, 1) == '#') {
+			//	continue;
+			//}
+
 			// map each column to an associative array, if a header row was present
 			if ($this->columns) {
 				// make sure enough columns are present
