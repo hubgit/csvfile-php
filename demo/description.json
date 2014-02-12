@@ -1,5 +1,4 @@
 {
-  "url": "header.csv",
   "context": "context.json",
   "dialect": {
     "delimiter": ",",
@@ -10,7 +9,7 @@
   },
   "headers": {
     "rows": 1,
-    "columns": 1,
+    "columns": 1
   },
   "skip": {
     "rows": 4,

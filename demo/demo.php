@@ -14,7 +14,7 @@ if ($description->context) {
 // read each row of the file and process it in a callback
 $items = array();
 
-$csvfile = new CSVFile($description->url, $description);
+$csvfile = new CSVFile('demo.csv', $description);
 $csvfile->read(function($item) use (&$items) {
 	$items[] = $item;
 });

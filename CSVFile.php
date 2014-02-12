@@ -7,17 +7,14 @@ class CSVFile {
 		'delimiter' => ',',
 		'enclosure' => '"',
 		'escape' => '\\',
-		//'double-quote' => true,
-		'skip-blank-rows' => false, // use blank rows as a table separator instead?
-		//'skip-initial-space' => false,
-		//'skip-final-space' => false,
+		'initial' => 0, // number of initial characters to ignore in each cell
 	);
 
 	/** @var array */
 	private $header = array();
 
 	/** @var array */
-	private $fields = array();
+	private $fields = null;
 
 	/** @var integer */
 	private $columns = 0;
@@ -41,7 +38,11 @@ class CSVFile {
 		print_r($description);
 
 		$this->dialect = array_merge($this->dialect, (array) $description->dialect);
-		$this->fields = $description->fields;
+
+		$this->fields = new stdClass;
+		foreach ($description->fields as $field => $definition) {
+			$this->fields->{$field} = is_string($definition) ? array('@type' => $definition) : $definition;
+		}
 
 		if (isset($description->header)) {
 			// read header row from the description
@@ -70,7 +71,7 @@ class CSVFile {
 			}
 
 			// blank row
-			if ($this->dialect['skip-blank-rows'] && count($row) === 1 && is_null($row[0])) {
+			if (count($row) === 1 && is_null($row[0])) {
 				continue;
 			}
 
@@ -84,6 +85,9 @@ class CSVFile {
 
 				// convert values to appropriate data types
 				array_walk($row, array($this, 'convert'));
+
+				// convert field names
+				$row = $this->convertFields($row);
 			}
 
 			call_user_func($callback, $row);
@@ -109,11 +113,35 @@ class CSVFile {
 	}
 
 	/**
+	 * Convert field names
+	 */
+	protected function convertFields($row) {
+		$item = array();
+
+		foreach ($row as $field => $value) {
+			$definition = $this->fields->{$field};
+
+			if (isset($definition->{'@id'})) {
+				$field = $definition->{'@id'};
+			}
+
+			$item[$field] = $value;
+		}
+
+		return $item;
+	}
+
+	/**
 	 * Convert values to appropriate data types
 	 *
 	 * http://www.w3.org/TR/rif-dtb/
 	 */
-	protected function convert(&$value, $field) {
+	protected function convert(&$value, &$field) {
+		// remove initial space(s) if required
+		if ($this->dialect['initial']) {
+			$value = substr($value, $this->dialect['initial']);
+		}
+
 		switch ($this->fields->{$field}->{'@type'}) {
 			case 'integer':
 			case 'http://www.w3.org/2001/XMLSchema#integer':
