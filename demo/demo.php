@@ -6,7 +6,7 @@ $description = json_decode(file_get_contents('description.json'));
 
 // header inside file
 
-$csvfile = new CSVFile(__DIR__ . '/header.csv', $description);
+$csvfile = new CSVFile($description->url, $description);
 
 $items = array();
 
