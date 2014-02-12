@@ -1,32 +1,47 @@
 <?php
 
 class CSVFile {
-	/** @var array */
+	/** 
+	 * CSV parser options
+	 * @var array 
+	 */
 	public $dialect = array(
-		'length' => 0,
-		'delimiter' => ',',
-		'enclosure' => '"',
-		'escape' => '\\',
+		'length' => 0, // maximum length of each line (0 = unlimited)
+		'delimiter' => ',', // character that separates each cell in a row
+		'enclosure' => '"', // character that (optionally) encloses each cell
+		'escape' => '\\', // character that escapes the enclosure character when not enclosing
 		'initial' => 0, // number of initial characters to ignore in each cell
 	);
 
-	/** @var array */
+	/** 
+	 * Contents of the cells in the header row
+	 * @var array 
+	 */
 	private $header = array();
 
-	/** @var array */
+	/** 
+	 * Schema for the cells in each column
+	 * @var array 
+	 */
 	private $fields = array();
 
-	/** @var integer */
+	/** 
+	 * Count of the cells in the header row
+	 * @var integer 
+	 */
 	private $columns = 0;
 
-	/** @var resource */
+	/** 
+	 * The CSV file
+	 * @var resource 
+	 */
 	private $resource;
 
 	/**
-	 * Open a file for reading
+	 * Open a CSV file for reading
 	 *
-	 * @param string  		$file
-	 * @param string|null   $descriptionFile
+	 * @param string  	$file		  CSV file path
+	 * @param string|null   $descriptionFile  JSON description file path
 	 */
 	public function __construct($file, $descriptionFile = null) {
 		$this->resource = fopen($file, 'r');
@@ -34,40 +49,42 @@ class CSVFile {
 		if (!$this->resource) {
 			throw new \Exception('Unable to open file ' . $file);
 		}
-
-		// read in the description file
-		$description = json_decode(file_get_contents($descriptionFile), true);
-
-		// read in the context file
-		if ($description['context']) {
-			$context = json_decode(file_get_contents($description['context']), true);
-			$description['fields'] = $context['@context'];
-		}
-
-		print_r($description);
-
-		$this->dialect = array_merge($this->dialect, $description['dialect']);
-
-		$this->fields = array();
-		foreach ($description['fields'] as $field => $definition) {
-			$this->fields[$field] = is_string($definition) ? array('@type' => $definition) : $definition;
-		}
-
-		// skip rows
-		if ($description['skip']['rows']) {
-			foreach (range(1, $description['skip']['rows']) as $skip) {
-				$this->row();
+		
+		if ($descriptionFile) {
+			// read in the description file
+			$description = json_decode(file_get_contents($descriptionFile), true);
+	
+			// read in the context file
+			if ($description['context']) {
+				$context = json_decode(file_get_contents($description['context']), true);
+				$description['fields'] = $context['@context'];
 			}
+	
+			print_r($description);
+
+			$this->dialect = array_merge($this->dialect, $description['dialect']);
+
+			foreach ($description['fields'] as $field => $definition) {
+				$this->fields[$field] = is_string($definition) ? array('@type' => $definition) : $definition;
+			}
+
+			// skip rows
+			if ($description['skip']['rows']) {
+				foreach (range(1, $description['skip']['rows']) as $skip) {
+					$this->row();
+				}
+			}
+
+			// TODO: skip columns ($description->skip->columns)
+	
 		}
-
-		// TODO: skip columns ($description->skip->columns)
-
-		if (isset($description['header'])) {
+		
+		// read header row from the csv file, or the description file
+		// TODO: handle more than one header row ($description->headers->rows)
+		if ($description && isset($description['header'])) {
 			// read header row from the description
 			$this->header = $description['header'];
 		} else {
-			// read header row from the csv file
-			// TODO: handle more than one header row ($description->headers->rows)
 			$this->header = $this->row();
 		}
 
