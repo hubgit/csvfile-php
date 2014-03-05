@@ -1,39 +1,39 @@
 <?php
 
 class CSVFile {
-	/** 
+	/**
 	 * CSV parser options
-	 * @var array 
+	 * @var array
 	 */
 	public $dialect = array(
 		'length' => 0, // maximum length of each line (0 = unlimited)
 		'delimiter' => ',', // character that separates each cell in a row
 		'enclosure' => '"', // character that (optionally) encloses each cell
 		'escape' => '\\', // character that escapes the enclosure character when not enclosing
-		'initial' => 0, // number of initial characters to ignore in each cell
+		'trim' => false, // number of initial characters to ignore in each cell
 	);
 
-	/** 
+	/**
 	 * Contents of the cells in the header row
-	 * @var array 
+	 * @var array
 	 */
 	private $header = array();
 
-	/** 
+	/**
 	 * Schema for the cells in each column
-	 * @var array 
+	 * @var array
 	 */
 	private $fields = array();
 
-	/** 
+	/**
 	 * Count of the cells in the header row
-	 * @var integer 
+	 * @var integer
 	 */
 	private $columns = 0;
 
-	/** 
+	/**
 	 * The CSV file
-	 * @var resource 
+	 * @var resource
 	 */
 	private $resource;
 
@@ -49,17 +49,17 @@ class CSVFile {
 		if (!$this->resource) {
 			throw new \Exception('Unable to open file ' . $file);
 		}
-		
+
 		if ($descriptionFile) {
 			// read in the description file
 			$description = json_decode(file_get_contents($descriptionFile), true);
-	
+
 			// read in the context file
 			if ($description['context']) {
 				$context = json_decode(file_get_contents($description['context']), true);
 				$description['fields'] = $context['@context'];
 			}
-	
+
 			print_r($description);
 
 			$this->dialect = array_merge($this->dialect, $description['dialect']);
@@ -76,9 +76,9 @@ class CSVFile {
 			}
 
 			// TODO: skip columns ($description->skip->columns)
-	
+
 		}
-		
+
 		// read header row from the csv file, or the description file
 		// TODO: handle more than one header row ($description->headers->rows)
 		if ($description && isset($description['header'])) {
@@ -177,9 +177,9 @@ class CSVFile {
 	 * http://www.w3.org/TR/rif-dtb/
 	 */
 	protected function convert(&$value, $field) {
-		// remove initial space(s) if required
-		if ($this->dialect['initial']) {
-			$value = substr($value, $this->dialect['initial']);
+		// trim whitespace if required
+		if ($this->dialect['trim']) {
+			$value = trim($value); // TODO: character_mask?
 		}
 
 		switch ($this->fields[$field]['@type']) {
